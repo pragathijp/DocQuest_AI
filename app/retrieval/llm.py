@@ -1,7 +1,9 @@
+import os
+from dotenv import load_dotenv
 from google import genai
 
-client = genai.Client(api_key="AIzaSyCd9pTGY0rEi6qtj1bZlHA70he8HW792Ms")
-
+load_dotenv()
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 def generate_answer(query: str, context: list[dict]) -> dict:
     """
     Step 5: LLM answer generation.
