@@ -12,11 +12,18 @@ if api_key:
     client = genai.Client(api_key=api_key)
 
 
-def generate_answer(query: str, context: list[dict], history: list[dict] = []) -> dict:
+def generate_answer(
+    query: str,
+    context: list[dict],
+    history: list[dict] | None = None
+) -> dict:
     """
     Step 5: LLM answer generation.
     Calls Gemini 2.5 Flash with query + context + chat history.
     """
+
+    # Avoid mutable default argument
+    history = history or []
 
     # Prevent crashes during CI/testing when no API key is available
     if client is None:
@@ -25,8 +32,24 @@ def generate_answer(query: str, context: list[dict], history: list[dict] = []) -
     print(f"[llm] Generating answer for query: {query}")
 
     context_text = "\n\n".join([c["chunk"] for c in context])
-    source_chunks = [c["chunk"] for c in context]
-    confidence = context[0]["score"] if context else 0.0
+
+    # Return only short previews instead of full chunks
+    source_chunks = [
+        {
+            "preview": (
+                c["chunk"][:150] + "..."
+                if len(c["chunk"]) > 150
+                else c["chunk"]
+            )
+        }
+        for c in context
+    ]
+
+    # Keep confidence between 0 and 1
+    confidence = (
+        round(min(1.0, context[0]["score"]), 3)
+        if context else 0.0
+    )
 
     # Build conversation history string
     history_text = ""
