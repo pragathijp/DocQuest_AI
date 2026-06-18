@@ -47,8 +47,8 @@ async def upload(file: UploadFile = File(...)):
 async def query(request: QueryRequest):
     history = [{"role": m.role, "content": m.content} for m in request.history]
     result = process_query(
-    query=request.query,
-    doc_id=request.doc_id,
-    history=history
+    request.query,
+    request.doc_id,
+    history
 )
     return result
