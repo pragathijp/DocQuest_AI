@@ -10,3 +10,4 @@ PyMuPDF
 pytest
 httpx
 flake8
+python-dotenv
