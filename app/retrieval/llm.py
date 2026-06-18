@@ -3,30 +3,44 @@ from dotenv import load_dotenv
 from google import genai
 
 load_dotenv()
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-def generate_answer(query: str, context: list[dict]) -> dict:
+
+# Create client only if API key exists
+client = None
+api_key = os.getenv("GEMINI_API_KEY")
+
+if api_key:
+    client = genai.Client(api_key=api_key)
+
+
+def generate_answer(query: str, context: list[dict], history: list[dict] = []) -> dict:
     """
     Step 5: LLM answer generation.
-    Calls Gemini 2.5 Flash with query + context.
-    NEVER uses outside knowledge — only context provided.
-
-    Args:
-        query   : rewritten user question
-        context : validated top chunks from reranker
-
-    Returns:
-        {"answer": str, "sources": list[str], "confidence": float}
+    Calls Gemini 2.5 Flash with query + context + chat history.
     """
+
+    # Prevent crashes during CI/testing when no API key is available
+    if client is None:
+        raise RuntimeError("GEMINI_API_KEY not configured")
+
     print(f"[llm] Generating answer for query: {query}")
 
-    context_text  = "\n\n".join([c["chunk"] for c in context])
+    context_text = "\n\n".join([c["chunk"] for c in context])
     source_chunks = [c["chunk"] for c in context]
-    confidence    = context[0]["score"] if context else 0.0
+    confidence = context[0]["score"] if context else 0.0
 
-    prompt = f"""Answer ONLY using the context below. Do not use outside knowledge.
-If the answer is not in the context, say 'Not found in document.'
+    # Build conversation history string
+    history_text = ""
+    if history:
+        history_text = "PREVIOUS CONVERSATION:\n"
+        for msg in history:
+            role = "User" if msg["role"] == "user" else "Assistant"
+            history_text += f"{role}: {msg['content']}\n"
+        history_text += "\n"
 
-CONTEXT:
+    prompt = f"""Answer ONLY using the context below. You may refer to the previous conversation if relevant.
+Do not use outside knowledge. If the answer is not in the context, say 'Not found in document.'
+
+{history_text}CONTEXT:
 {context_text}
 
 QUESTION: {query}
@@ -37,12 +51,13 @@ ANSWER:"""
         model="gemini-2.5-flash",
         contents=prompt
     )
+
     answer = response.text.strip()
 
     print(f"[llm] Answer generated. Confidence: {confidence}")
 
     return {
-        "answer":     answer,
-        "sources":    source_chunks,
+        "answer": answer,
+        "sources": source_chunks,
         "confidence": confidence
     }
