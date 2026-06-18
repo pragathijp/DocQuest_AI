@@ -10,14 +10,14 @@ from guardrails import validate_chunks
 from llm import generate_answer
 
 
-def process_query(query: str, doc_id: str) -> dict:
+def process_query(query: str, doc_id: str, history: list[dict] = []) -> dict:
     """
     Main orchestrator — connects all 5 modules in order.
-    This is the single function the team calls.
 
     Args:
-        query  : raw user question
-        doc_id : UUID from Member 1's process_document()
+        query   : raw user question
+        doc_id  : UUID from Member 1's process_document()
+        history : list of previous messages [{"role": "user"/"assistant", "content": "..."}]
 
     Returns:
         {"answer": str, "sources": list[str], "confidence": float}
@@ -50,7 +50,7 @@ def process_query(query: str, doc_id: str) -> dict:
 
     # Step 5 — Generate answer
     print("[pipeline] Step 5/5 — Generating answer...")
-    result = generate_answer(q, top_chunks)
+    result = generate_answer(q, top_chunks, history)
 
     print(f"[pipeline] ── Pipeline complete.\n")
     return result
