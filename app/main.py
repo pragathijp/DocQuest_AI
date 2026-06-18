@@ -19,9 +19,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+class HistoryMessage(BaseModel):
+    role: str
+    content: str
+
 class QueryRequest(BaseModel):
     query: str
     doc_id: str
+    history: list[HistoryMessage] = []
 
 @app.post("/upload")
 async def upload(file: UploadFile = File(...)):
@@ -40,5 +45,10 @@ async def upload(file: UploadFile = File(...)):
 
 @app.post("/query")
 async def query(request: QueryRequest):
-    result = process_query(request.query, request.doc_id)
+    history = [{"role": m.role, "content": m.content} for m in request.history]
+    result = process_query(
+    query=request.query,
+    doc_id=request.doc_id,
+    history=history
+)
     return result
