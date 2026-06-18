@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+python-multipart
+pydantic
+qdrant-client
+rank-bm25
+sentence-transformers
+google-generativeai
+PyMuPDF
+pytest
+httpx
+flake8
