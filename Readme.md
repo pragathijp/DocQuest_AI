@@ -148,6 +148,9 @@ DocQuest_AI/
 ---
 
 ## Architecture
+## System Architecture
+
+![DocQuest AI Architecture](docs/screenshots/docquest_architecture.png)
 
 ### Document Indexing Pipeline
 
@@ -167,6 +170,8 @@ Qdrant Storage
 Chunk Persistence
     ↓
 BM25 Index Creation
+
+
 ```
 
 ### Retrieval Pipeline
