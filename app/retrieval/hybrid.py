@@ -6,6 +6,9 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'indexing'))
 from qdrant_client import QdrantClient
 from embedder import generate_embeddings
 from bm25_index import get_bm25_index, get_chunks
+from app.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 client = QdrantClient("localhost", port=6333)
 
@@ -88,8 +91,8 @@ def retrieve_chunks(query: str, doc_id: str) -> list[dict]:
     Top 10 Chunks
     """
 
-    print(f"[hybrid] Retrieving chunks for doc_id: {doc_id}")
-    print(f"[hybrid] Query: {query}")
+    logger.info(f"Retrieving chunks for doc_id: {doc_id}")
+    logger.info(f"Query: {query}")
 
     # =========================
     # Dense Retrieval (Qdrant)
@@ -119,7 +122,7 @@ def retrieve_chunks(query: str, doc_id: str) -> list[dict]:
         for h in hits
     ]
 
-    print(f"[hybrid] Semantic retrieved: {len(semantic_chunks)}")
+    logger.info(f"Semantic retrieved: {len(semantic_chunks)}")
 
     # =========================
     # BM25 Retrieval
@@ -150,9 +153,9 @@ def retrieve_chunks(query: str, doc_id: str) -> list[dict]:
         ]
 
     except KeyError as e:
-        print(f"[hybrid] BM25 unavailable: {e}")
+        logger.warning(f"BM25 unavailable: {e}")
 
-    print(f"[hybrid] BM25 retrieved: {len(bm25_chunks)}")
+    logger.info(f"BM25 retrieved: {len(bm25_chunks)}")
 
     # =========================
     # RRF Fusion
@@ -163,9 +166,8 @@ def retrieve_chunks(query: str, doc_id: str) -> list[dict]:
         bm25_chunks
     )
 
-    print(f"[retrieval] Query: {query}")
-    print(f"[retrieval] Dense retrieved: {len(semantic_chunks)}")
-    print(f"[retrieval] BM25 retrieved: {len(bm25_chunks)}")
-    print(f"[retrieval] After RRF: {len(fused_chunks)}")
+    logger.info(f"Dense retrieved: {len(semantic_chunks)}")
+    logger.info(f"BM25 retrieved: {len(bm25_chunks)}")
+    logger.info(f"After RRF: {len(fused_chunks)}")
 
     return fused_chunks

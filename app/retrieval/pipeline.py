@@ -8,6 +8,9 @@ from hybrid import retrieve_chunks
 from reranker import rerank_chunks
 from guardrails import validate_chunks
 from llm import generate_answer
+from app.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 def process_query(
@@ -31,26 +34,28 @@ def process_query(
     # Avoid mutable default argument bug
     history = history or []
 
-    print(f"\n[pipeline] ── Starting retrieval pipeline")
-    print(f"[pipeline] Query: {query}")
-    print(f"[pipeline] doc_id: {doc_id}")
+    logger.info("Starting retrieval pipeline")
+    logger.info(f"Query: {query}")
+    logger.info(f"doc_id: {doc_id}")
 
     # Step 1 — Rewrite query
-    print("[pipeline] Step 1/5 — Rewriting query...")
+    logger.info("Step 1/5 - Rewriting query")
     q = rewrite_query(query)
 
     # Step 2 — Retrieve chunks
-    print("[pipeline] Step 2/5 — Retrieving chunks...")
+    logger.info("Step 2/5 - Retrieving chunks")
     chunks = retrieve_chunks(q, doc_id)
 
     # Step 3 — Rerank
-    print("[pipeline] Step 3/5 — Reranking chunks...")
+    logger.info("Step 3/5 - Reranking chunks")
     top_chunks = rerank_chunks(chunks, q)
 
     # Step 4 — Validate
-    print("[pipeline] Step 4/5 — Validating chunks...")
+    logger.info("Step 4/5 - Validating chunks")
+
     if not validate_chunks(top_chunks):
-        print("[pipeline] Guard triggered — returning fallback.")
+        logger.warning("Guard triggered - returning fallback")
+
         return {
             "answer": "No relevant info found",
             "sources": [],
@@ -58,9 +63,9 @@ def process_query(
         }
 
     # Step 5 — Generate answer
-    print("[pipeline] Step 5/5 — Generating answer...")
+    logger.info("Step 5/5 - Generating answer")
     result = generate_answer(q, top_chunks, history)
 
-    print("[pipeline] ── Pipeline complete.\n")
+    logger.info("Pipeline complete")
 
     return result
