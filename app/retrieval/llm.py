@@ -45,11 +45,18 @@ def generate_answer(
         for c in context
     ]
 
-    # Keep confidence between 0 and 1
-    confidence = (
-        round(min(1.0, context[0]["score"]), 3)
-        if context else 0.0
-    )
+    # Confidence based on CrossEncoder rerank score
+    if context:
+        rerank_score = context[0].get("rerank_score", -100)
+
+        if rerank_score >= -3:
+            confidence = "High"
+        elif rerank_score >= -8:
+            confidence = "Medium"
+        else:
+            confidence = "Low"
+    else:
+        confidence = "Low"
 
     # Build conversation history string
     history_text = ""
@@ -77,7 +84,10 @@ ANSWER:"""
 
     answer = response.text.strip()
 
-    print(f"[llm] Answer generated. Confidence: {confidence}")
+    print(
+        f"[llm] Answer generated. Confidence: {confidence} "
+        f"(rerank_score={context[0].get('rerank_score', 'N/A') if context else 'N/A'})"
+    )
 
     return {
         "answer": answer,

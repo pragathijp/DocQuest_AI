@@ -45,7 +45,7 @@ def process_query(
 
     # Step 3 — Rerank
     print("[pipeline] Step 3/5 — Reranking chunks...")
-    top_chunks = rerank_chunks(chunks)[:3]
+    top_chunks = rerank_chunks(chunks, q)
 
     # Step 4 — Validate
     print("[pipeline] Step 4/5 — Validating chunks...")

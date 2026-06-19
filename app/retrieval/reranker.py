@@ -1,15 +1,45 @@
-def rerank_chunks(chunks: list[dict]) -> list[dict]:
+from sentence_transformers import CrossEncoder
+
+# Load once at startup
+model = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
+
+print("=== CROSSENCODER RERANKER LOADED ===")
+
+
+def rerank_chunks(chunks: list[dict], query: str) -> list[dict]:
     """
-    Step 3: Reranking.
-    Sorts chunks by score descending, keeps top 3.
+    CrossEncoder reranking.
 
     Args:
-        chunks : list of dicts with 'chunk' and 'score' keys
+        chunks : retrieved chunks
+        query  : user query
 
     Returns:
-        Top 3 chunks sorted by score descending
+        Top 3 reranked chunks
     """
-    print(f"[reranker] Reranking {len(chunks)} chunks...")
-    reranked = sorted(chunks, key=lambda x: x["score"], reverse=True)[:3]
+
+    if not chunks:
+        return []
+
+    print(f"[reranker] CrossEncoder reranking {len(chunks)} chunks...")
+
+    pairs = [
+        (query, chunk["chunk"])
+        for chunk in chunks
+    ]
+
+    scores = model.predict(pairs)
+
+    for chunk, score in zip(chunks, scores):
+        chunk["rerank_score"] = float(score)
+        print(f"[reranker] Score: {float(score):.4f}")
+
+    reranked = sorted(
+        chunks,
+        key=lambda x: x["rerank_score"],
+        reverse=True
+    )[:3]
+
     print(f"[reranker] Top {len(reranked)} chunks selected.")
+
     return reranked
