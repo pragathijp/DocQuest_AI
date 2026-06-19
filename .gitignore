@@ -18,3 +18,6 @@ frontend/.next/
 # OS
 .DS_Store
 Thumbs.db
+
+# BM25 persisted data
+storage/

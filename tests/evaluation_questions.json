@@ -1,13 +1,22 @@
 [
   {
-    "question": "What are the candidate's technical skills?",
+    "question": "What technical skills does the candidate have?",
     "expected_keywords": ["Python", "FastAPI", "SQL"]
   },
   {
     "question": "What projects has the candidate worked on?",
-    "expected_keywords": ["DocQuest", "RAG"]
+    "expected_keywords": ["DocQuest", "Project"]
   },
   {
-    "question": "What is the candidate's education?"
+    "question": "What is the candidate's education?",
+    "expected_keywords": ["B.E.", "Computer Science"]
+  },
+  {
+    "question": "What internships or experience does the candidate have?",
+    "expected_keywords": ["Internship"]
+  },
+  {
+    "question": "What programming languages does the candidate know?",
+    "expected_keywords": ["Python", "Java"]
   }
 ]
