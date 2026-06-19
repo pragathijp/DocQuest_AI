@@ -1,0 +1,13 @@
+[
+  {
+    "question": "What are the candidate's technical skills?",
+    "expected_keywords": ["Python", "FastAPI", "SQL"]
+  },
+  {
+    "question": "What projects has the candidate worked on?",
+    "expected_keywords": ["DocQuest", "RAG"]
+  },
+  {
+    "question": "What is the candidate's education?"
+  }
+]

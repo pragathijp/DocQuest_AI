@@ -25,7 +25,7 @@ def rrf_fusion(
     """
     Reciprocal Rank Fusion (RRF)
 
-    Combines rankings from:
+    Combines:
     - Dense Retrieval (Qdrant)
     - Sparse Retrieval (BM25)
 
@@ -34,7 +34,6 @@ def rrf_fusion(
     """
 
     rrf_scores = {}
-    chunk_lookup = {}
 
     # Dense ranking
     for rank, item in enumerate(
@@ -47,8 +46,6 @@ def rrf_fusion(
             + 1 / (k + rank + 1)
         )
 
-        chunk_lookup[chunk] = chunk
-
     # BM25 ranking
     for rank, item in enumerate(
         sorted(bm25_chunks, key=lambda x: x["score"], reverse=True)
@@ -59,8 +56,6 @@ def rrf_fusion(
             rrf_scores.get(chunk, 0)
             + 1 / (k + rank + 1)
         )
-
-        chunk_lookup[chunk] = chunk
 
     fused = [
         {
@@ -84,13 +79,13 @@ def retrieve_chunks(query: str, doc_id: str) -> list[dict]:
 
     Query
       ↓
-    Dense Search (Qdrant Top20)
+    Dense Search (Top 20)
       +
-    BM25 Search (Top20)
+    BM25 Search (Top 20)
       ↓
     RRF Fusion
       ↓
-    Top10 Chunks
+    Top 10 Chunks
     """
 
     print(f"[hybrid] Retrieving chunks for doc_id: {doc_id}")
@@ -168,6 +163,9 @@ def retrieve_chunks(query: str, doc_id: str) -> list[dict]:
         bm25_chunks
     )
 
-    print(f"[hybrid] After RRF: {len(fused_chunks)}")
+    print(f"[retrieval] Query: {query}")
+    print(f"[retrieval] Dense retrieved: {len(semantic_chunks)}")
+    print(f"[retrieval] BM25 retrieved: {len(bm25_chunks)}")
+    print(f"[retrieval] After RRF: {len(fused_chunks)}")
 
     return fused_chunks
