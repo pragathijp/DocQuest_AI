@@ -1,0 +1,68 @@
+# Python
+
+**pycache**/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+
+venv/
+.venv/
+env/
+ENV/
+
+# Environment files
+
+.env
+.env.*
+
+# Logs
+
+*.log
+logs/
+
+# Testing
+
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# IDE
+
+.vscode/
+.idea/
+
+# OS files
+
+.DS_Store
+Thumbs.db
+
+# Frontend dependencies
+
+node_modules/
+frontend/node_modules/
+frontend/.next/
+
+# Runtime generated storage
+
+storage/
+*.db
+*.sqlite
+*.sqlite3
+
+# Git
+
+.git/
+
+# Temporary files
+
+*.tmp
+*.temp
+
+# Python build artifacts
+
+build/
+dist/
+*.egg-info/
+.eggs/
