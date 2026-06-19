@@ -32,7 +32,7 @@ def retrieve_chunks(query: str, doc_id: str) -> list[dict]:
         query_filter={
             "must": [{"key": "doc_id", "match": {"value": doc_id}}]
         },
-        limit=5
+        limit=20
     ).points
 
     semantic_chunks = [
@@ -46,7 +46,7 @@ def retrieve_chunks(query: str, doc_id: str) -> list[dict]:
     chunks_list = get_chunks(doc_id)
     tokenized_query = query.lower().split()
     scores = bm25.get_scores(tokenized_query)
-    top_indices = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)[:5]
+    top_indices = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)[:20]
 
     bm25_chunks = [
         {"chunk": chunks_list[top_indices[i]], "score": float(scores[top_indices[i]])}
