@@ -8,12 +8,22 @@ logger = get_logger(__name__)
 # Load model once at startup
 # ==========================================
 
-model = CrossEncoder(
-    "cross-encoder/ms-marco-MiniLM-L-6-v2"
-)
+_model = None
+
+
+
+def get_model():
+    global _model
+
+    if _model is None:
+        _model = CrossEncoder(
+            "cross-encoder/ms-marco-MiniLM-L-6-v2"
+        )
+
+    return _model
 
 logger.info(
-    "CrossEncoder reranker loaded"
+    "CrossEncoder reranker initialized"
 )
 
 
@@ -61,9 +71,9 @@ def rerank_chunks(
         for chunk in valid_chunks
     ]
 
-    scores = model.predict(
-        pairs
-    )
+    model = get_model()
+
+    scores = model.predict(pairs)
 
     for chunk, score in zip(
         valid_chunks,
