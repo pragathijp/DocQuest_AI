@@ -1,39 +1,43 @@
-import os
-from dotenv import load_dotenv
 from google import genai
 
-load_dotenv()
+from app.config import GOOGLE_API_KEY
+from app.utils.logger import get_logger
 
-# Create client only if API key exists
-client = None
-api_key = os.getenv("GEMINI_API_KEY")
+logger = get_logger(__name__)
 
-if api_key:
-    client = genai.Client(api_key=api_key)
+# ==========================================
+# Gemini Client
+# ==========================================
+
+client = genai.Client(
+    api_key=GOOGLE_API_KEY
+)
+
+logger.info(
+    "Gemini client initialized"
+)
 
 
 def generate_answer(
     query: str,
     context: list[dict],
-    history: list[dict] | None = None
+    history: list[dict] | None = None,
 ) -> dict:
     """
-    Step 5: LLM answer generation.
-    Calls Gemini 2.5 Flash with query + context + chat history.
+    Generate answer using Gemini 2.5 Flash.
     """
 
-    # Avoid mutable default argument
     history = history or []
 
-    # Prevent crashes during CI/testing when no API key is available
-    if client is None:
-        raise RuntimeError("GEMINI_API_KEY not configured")
+    logger.info(
+        f"Generating answer for query: {query}"
+    )
 
-    print(f"[llm] Generating answer for query: {query}")
+    context_text = "\n\n".join(
+        c["chunk"]
+        for c in context
+    )
 
-    context_text = "\n\n".join([c["chunk"] for c in context])
-
-    # Return only short previews instead of full chunks
     source_chunks = [
         {
             "preview": (
@@ -45,9 +49,15 @@ def generate_answer(
         for c in context
     ]
 
-    # Confidence based on CrossEncoder rerank score
+    # ==========================================
+    # Confidence Estimation
+    # ==========================================
+
     if context:
-        rerank_score = context[0].get("rerank_score", -100)
+        rerank_score = context[0].get(
+            "rerank_score",
+            -100,
+        )
 
         if rerank_score >= -3:
             confidence = "High"
@@ -58,39 +68,81 @@ def generate_answer(
     else:
         confidence = "Low"
 
-    # Build conversation history string
+    # ==========================================
+    # Conversation History
+    # ==========================================
+
     history_text = ""
+
     if history:
-        history_text = "PREVIOUS CONVERSATION:\n"
+        history_text = (
+            "PREVIOUS CONVERSATION:\n"
+        )
+
         for msg in history:
-            role = "User" if msg["role"] == "user" else "Assistant"
-            history_text += f"{role}: {msg['content']}\n"
+            role = (
+                "User"
+                if msg["role"] == "user"
+                else "Assistant"
+            )
+
+            history_text += (
+                f"{role}: "
+                f"{msg['content']}\n"
+            )
+
         history_text += "\n"
 
-    prompt = f"""Answer ONLY using the context below. You may refer to the previous conversation if relevant.
-Do not use outside knowledge. If the answer is not in the context, say 'Not found in document.'
+    prompt = f"""
+Answer ONLY using the context below.
 
-{history_text}CONTEXT:
+You may refer to the previous conversation if relevant.
+
+Do not use outside knowledge.
+
+If the answer is not in the context,
+say exactly:
+
+Not found in document.
+
+{history_text}
+
+CONTEXT:
 {context_text}
 
-QUESTION: {query}
+QUESTION:
+{query}
 
-ANSWER:"""
+ANSWER:
+"""
 
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt
-    )
+    try:
+        response = (
+            client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt,
+            )
+        )
 
-    answer = response.text.strip()
+        answer = response.text.strip()
 
-    print(
-        f"[llm] Answer generated. Confidence: {confidence} "
-        f"(rerank_score={context[0].get('rerank_score', 'N/A') if context else 'N/A'})"
+    except Exception as e:
+        logger.exception(
+            "Gemini generation failed"
+        )
+
+        answer = (
+            "Unable to generate answer "
+            "at this time."
+        )
+
+    logger.info(
+        f"Answer generated "
+        f"(confidence={confidence})"
     )
 
     return {
         "answer": answer,
         "sources": source_chunks,
-        "confidence": confidence
+        "confidence": confidence,
     }

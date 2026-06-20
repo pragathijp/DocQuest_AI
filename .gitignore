@@ -1,11 +1,19 @@
 # Environment
 .env
 .env.*
+!.env.example
 
 # Python
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 .pytest_cache/
+.venv/
+venv/
+
+# Logs
+*.log
 
 # Frontend
 frontend/node_modules/
@@ -21,3 +29,7 @@ Thumbs.db
 
 # BM25 persisted data
 storage/
+
+# Build artifacts
+dist/
+build/

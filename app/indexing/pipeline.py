@@ -1,17 +1,17 @@
 import uuid
-import sys
-import os
+
 
 # Make sure imports work when run from any directory
-sys.path.insert(0, os.path.dirname(__file__))
 
-from extractor import extract_text
-from cleaner import clean_text
-from chunker import chunk_text
-from embedder import generate_embeddings
-from qdrant_store import store_vectors
-from bm25_index import build_bm25_index
-from storage import save_chunks
+
+from app.indexing.extractor import extract_text
+from app.indexing.cleaner import clean_text
+from app.indexing.chunker import chunk_text
+from app.indexing.embedder import generate_embeddings
+from app.indexing.qdrant_store import store_vectors
+from app.indexing.bm25_index import build_bm25_index
+from app.indexing.storage import save_chunks
+
 from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -60,6 +60,10 @@ def process_document(file_path: str) -> dict:
     # Step 4 — Embed
     logger.info("Step 4/6 - Generating embeddings")
     vectors = generate_embeddings(chunks)
+    if not vectors:
+        raise ValueError(
+            "Pipeline aborted: No embeddings generated."
+    )
 
     if len(vectors) != len(chunks):
         raise ValueError(

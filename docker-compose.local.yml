@@ -1,0 +1,47 @@
+version: "3.9"
+
+services:
+  docquest-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: docquest-backend
+
+    ports:
+      - "8000:8000"
+
+    environment:
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+
+    depends_on:
+      - qdrant
+
+    restart: unless-stopped
+
+    networks:
+      - docquest-network
+
+  qdrant:
+    image: qdrant/qdrant:latest
+
+    container_name: qdrant
+
+    ports:
+      - "6333:6333"
+
+    volumes:
+      - qdrant_storage:/qdrant/storage
+
+    restart: unless-stopped
+
+    networks:
+      - docquest-network
+
+volumes:
+  qdrant_storage:
+
+networks:
+  docquest-network:
+    driver: bridge

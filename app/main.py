@@ -1,52 +1,71 @@
-import sys
 import os
-from datetime import datetime
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-
 import tempfile
+from datetime import datetime
 
 from fastapi import (
     FastAPI,
     UploadFile,
     File,
     HTTPException,
-    Request
+    Request,
 )
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field
-from qdrant_client import QdrantClient
+from fastapi.middleware.cors import (
+    CORSMiddleware
+)
+from fastapi.responses import (
+    JSONResponse
+)
+from pydantic import (
+    BaseModel,
+    Field,
+)
 
+from app.config import CORS_ORIGINS
+from app.qdrant_client import (
+    client as qdrant_client
+)
 
-from app.indexing.pipeline import process_document
-from app.retrieval.pipeline import process_query
-from app.utils.logger import get_logger
+from app.indexing.pipeline import (
+    process_document
+)
+from app.retrieval.pipeline import (
+    process_query
+)
+from app.utils.logger import (
+    get_logger
+)
 
 logger = get_logger(__name__)
 
-qdrant_client = QdrantClient("localhost", port=6333)
-
 MAX_FILE_SIZE = 20 * 1024 * 1024  # 20 MB
 
-app = FastAPI(title="DocQuest AI")
+
+app = FastAPI(
+    title="DocQuest AI",
+    version="1.0.0",
+    description=(
+        "Production RAG system powered by "
+        "Gemini, Qdrant, Hybrid Retrieval, "
+        "BM25, RRF, and CrossEncoder reranking."
+    ),
+)
 
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-    ],
+    allow_origins=CORS_ORIGINS,
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 
 
 # ==========================================
-# HTTP Exceptions
+# Exception Handlers
 # ==========================================
 
-@app.exception_handler(HTTPException)
+@app.exception_handler(
+    HTTPException
+)
 async def http_exception_handler(
     request: Request,
     exc: HTTPException
@@ -64,10 +83,6 @@ async def http_exception_handler(
         }
     )
 
-
-# ==========================================
-# Unhandled Exceptions
-# ==========================================
 
 @app.exception_handler(Exception)
 async def global_exception_handler(
@@ -91,37 +106,47 @@ async def global_exception_handler(
 # Health Check
 # ==========================================
 
-@app.get("/health")
+@app.get(
+    "/health",
+    tags=["Monitoring"]
+)
 async def health():
     return {
         "status": "healthy",
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": (
+            datetime.utcnow()
+            .isoformat()
+        ),
     }
+
 
 # ==========================================
 # Readiness Check
 # ==========================================
 
-@app.get("/ready")
+@app.get(
+    "/readiness",
+    tags=["Monitoring"]
+)
 async def readiness():
-    """
-    Readiness endpoint that checks Qdrant availability.
-    Returns 200 with {"status": "ready"} if Qdrant is reachable.
-    Returns 503 if Qdrant is unavailable.
-    """
     try:
         qdrant_client.get_collections()
+
         return {
             "status": "ready"
         }
-    
+
     except Exception as e:
         logger.warning(
-            f"Readiness check failed: Qdrant unavailable - {str(e)}"
+            f"Readiness check failed: "
+            f"{str(e)}"
         )
+
         raise HTTPException(
             status_code=503,
-            detail="Service unavailable - Qdrant is not reachable"
+            detail=(
+                "Qdrant is not reachable"
+            ),
         )
 
 
@@ -129,15 +154,22 @@ async def readiness():
 # Request Models
 # ==========================================
 
-class HistoryMessage(BaseModel):
+class HistoryMessage(
+    BaseModel
+):
     role: str
     content: str
 
 
-class QueryRequest(BaseModel):
+class QueryRequest(
+    BaseModel
+):
     query: str
     doc_id: str
-    history: list[HistoryMessage] = Field(
+
+    history: list[
+        HistoryMessage
+    ] = Field(
         default_factory=list
     )
 
@@ -146,14 +178,22 @@ class QueryRequest(BaseModel):
 # Upload Endpoint
 # ==========================================
 
-@app.post("/upload")
+@app.post(
+    "/upload",
+    tags=["Documents"]
+)
 async def upload(
     file: UploadFile = File(...)
 ):
-    if not file.filename.endswith(".pdf"):
+    if not file.filename.endswith(
+        ".pdf"
+    ):
         raise HTTPException(
             status_code=400,
-            detail="Only PDF files are supported."
+            detail=(
+                "Only PDF files "
+                "are supported."
+            ),
         )
 
     contents = await file.read()
@@ -161,7 +201,10 @@ async def upload(
     if len(contents) > MAX_FILE_SIZE:
         raise HTTPException(
             status_code=413,
-            detail="File exceeds 20 MB limit."
+            detail=(
+                "File exceeds "
+                "20 MB limit."
+            ),
         )
 
     with tempfile.NamedTemporaryFile(
@@ -172,12 +215,14 @@ async def upload(
         tmp_path = tmp.name
 
     try:
-        result = process_document(tmp_path)
+        result = process_document(
+            tmp_path
+        )
 
     except ValueError as e:
         raise HTTPException(
             status_code=422,
-            detail=str(e)
+            detail=str(e),
         )
 
     finally:
@@ -191,7 +236,10 @@ async def upload(
 # Query Endpoint
 # ==========================================
 
-@app.post("/query")
+@app.post(
+    "/query",
+    tags=["Retrieval"]
+)
 async def query(
     request: QueryRequest
 ):
@@ -204,16 +252,16 @@ async def query(
     ]
 
     try:
-        result = process_query(
+        return process_query(
             request.query,
             request.doc_id,
             history,
         )
 
-        return result
-
     except KeyError:
         raise HTTPException(
             status_code=404,
-            detail="Document not found."
+            detail=(
+                "Document not found."
+            ),
         )
