@@ -1,15 +1,8 @@
-from sentence_transformers import CrossEncoder
-
 from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-# ==========================================
-# Load model once at startup
-# ==========================================
-
 _model = None
-
 
 
 def get_model():
@@ -20,12 +13,13 @@ def get_model():
             "Loading CrossEncoder model..."
         )
 
+        from sentence_transformers import CrossEncoder
+
         _model = CrossEncoder(
             "cross-encoder/ms-marco-MiniLM-L-6-v2"
         )
 
     return _model
-
 
 
 def rerank_chunks(
@@ -74,7 +68,9 @@ def rerank_chunks(
 
     model = get_model()
 
-    scores = model.predict(pairs)
+    scores = model.predict(
+        pairs
+    )
 
     for chunk, score in zip(
         valid_chunks,

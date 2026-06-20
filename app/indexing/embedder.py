@@ -1,5 +1,3 @@
-from sentence_transformers import SentenceTransformer
-
 _model = None
 
 
@@ -7,6 +5,10 @@ def get_model():
     global _model
 
     if _model is None:
+        from sentence_transformers import (
+            SentenceTransformer,
+        )
+
         _model = SentenceTransformer(
             "all-MiniLM-L6-v2"
         )
@@ -17,6 +19,16 @@ def get_model():
 def generate_embeddings(
     chunks: list[str]
 ) -> list[list[float]]:
+    """
+    Generate normalized embeddings for text chunks.
+
+    Args:
+        chunks: List of text chunks
+
+    Returns:
+        List of embedding vectors
+    """
+
     if not chunks:
         return []
 
