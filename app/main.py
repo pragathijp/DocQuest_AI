@@ -1,22 +1,4 @@
-print("STEP 1")
-from app.config import CORS_ORIGINS
 
-print("STEP 2")
-from app.qdrant_client import (
-    client as qdrant_client
-)
-
-print("STEP 3")
-from app.indexing.pipeline import (
-    process_document
-)
-
-print("STEP 4")
-from app.retrieval.pipeline import (
-    process_query
-)
-
-print("STEP 5")
 import os
 import tempfile
 from datetime import datetime
@@ -238,18 +220,21 @@ async def upload(
             tmp_path
         )
 
-    except ValueError as e:
-        raise HTTPException(
-            status_code=422,
-            detail=str(e),
+        return result
+
+    except Exception as e:
+        logger.exception(
+            f"UPLOAD FAILED: {str(e)}"
         )
+        raise
 
     finally:
-        if os.path.exists(tmp_path):
-            os.unlink(tmp_path)
-
-    return result
-
+        if os.path.exists(
+            tmp_path
+        ):
+            os.unlink(
+                tmp_path
+            )
 
 # ==========================================
 # Query Endpoint
