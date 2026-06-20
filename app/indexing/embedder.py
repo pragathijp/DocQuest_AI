@@ -1,9 +1,6 @@
 _model = None
 
 
-_model = None
-
-
 def get_model():
     global _model
 
@@ -19,9 +16,13 @@ def get_model():
 
         print("EMBEDDER STEP 3")
 
+        print("LOADING MODEL NOW")
+
         _model = SentenceTransformer(
             "all-MiniLM-L6-v2"
         )
+
+        print("MODEL LOADED")
 
         print("EMBEDDER STEP 4")
 
