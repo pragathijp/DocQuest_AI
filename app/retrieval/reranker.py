@@ -16,15 +16,16 @@ def get_model():
     global _model
 
     if _model is None:
+        logger.info(
+            "Loading CrossEncoder model..."
+        )
+
         _model = CrossEncoder(
             "cross-encoder/ms-marco-MiniLM-L-6-v2"
         )
 
     return _model
 
-logger.info(
-    "CrossEncoder reranker initialized"
-)
 
 
 def rerank_chunks(
