@@ -222,11 +222,20 @@ async def upload(
 
         return result
 
-    except Exception as e:
-        logger.exception(
-            f"UPLOAD FAILED: {str(e)}"
-        )
-        raise
+   except ValueError as e:
+    logger.exception(
+        f"UPLOAD FAILED: {str(e)}"
+    )
+    raise HTTPException(
+        status_code=422,
+        detail=str(e),
+    )
+
+except Exception as e:
+    logger.exception(
+        f"UPLOAD FAILED: {str(e)}"
+    )
+    raise
 
     finally:
         if os.path.exists(
