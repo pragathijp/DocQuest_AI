@@ -222,20 +222,20 @@ async def upload(
 
         return result
 
-   except ValueError as e:
-    logger.exception(
-        f"UPLOAD FAILED: {str(e)}"
-    )
-    raise HTTPException(
-        status_code=422,
-        detail=str(e),
-    )
+    except ValueError as e:
+        logger.exception(
+            f"UPLOAD FAILED: {str(e)}"
+        )
+        raise HTTPException(
+            status_code=422,
+            detail=str(e),
+        )
 
-except Exception as e:
-    logger.exception(
-        f"UPLOAD FAILED: {str(e)}"
-    )
-    raise
+    except Exception as e:
+        logger.exception(
+            f"UPLOAD FAILED: {str(e)}"
+        )
+        raise
 
     finally:
         if os.path.exists(
@@ -244,7 +244,6 @@ except Exception as e:
             os.unlink(
                 tmp_path
             )
-
 # ==========================================
 # Query Endpoint
 # ==========================================
