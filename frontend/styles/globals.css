@@ -661,9 +661,13 @@ body {
   }
 
   .mobile-upload {
-  display: block;
-  padding: 12px 16px;
-}
+    display: block;
+    padding: 12px 16px;
+  }
+
+  .inputbox-hint {
+    display: none;
+  }
 
   .chat-body {
     padding: 16px;
