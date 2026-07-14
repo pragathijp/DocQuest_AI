@@ -116,7 +116,7 @@ setErrorBanner(null);
       <aside className="sidebar">
         <div className="sidebar-header">
           <span className="logo-mark">⬡</span>
-          <span className="logo-text">DocMind</span>
+          <span className="logo-text">DocQuest AI</span>
         </div>
 
         <div className="sidebar-section">
@@ -152,7 +152,7 @@ setErrorBanner(null);
   <header className="chat-header">
     <div className="chat-title">
   <span className="logo-mark">⬡</span>
-  <span>DocMind</span>
+  <span>DocQuest AI</span>
 </div>
 
     {docId && (

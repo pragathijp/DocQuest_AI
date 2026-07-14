@@ -7,7 +7,7 @@ const Home: NextPage = () => {
   return (
     <>
       <Head>
-        <title>DocMind — PDF Chat</title>
+        <title>DocQuest AI</title>
         <meta name="description" content="Chat with your PDF documents using AI" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
