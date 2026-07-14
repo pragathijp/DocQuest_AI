@@ -145,7 +145,10 @@ export const Chat: React.FC = () => {
       {/* Main chat area */}
       <main className="chat-main">
   <header className="chat-header">
-    <h1 className="chat-title">PDF Chat</h1>
+    <div className="chat-title">
+  <span className="logo-mark">⬡</span>
+  <span>DocMind</span>
+</div>
 
     {docId && (
       <span className="status-pill">
