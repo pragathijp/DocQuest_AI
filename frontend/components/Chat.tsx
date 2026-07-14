@@ -72,11 +72,16 @@ export const Chat: React.FC = () => {
 
   const handleSubmit = useCallback(async () => {
     const query = input.trim();
-    if (!query || !docId || isQuerying) return;
 
-    setInput("");
-    setErrorBanner(null);
+if (!query || isQuerying) return;
 
+if (!docId) {
+  setErrorBanner("📄 Please upload a PDF before asking a question.");
+  return;
+}
+
+setInput("");
+setErrorBanner(null);
     setMessages((prev) => [...prev, makeMessage("user", query)]);
     setIsQuerying(true);
 
@@ -216,7 +221,7 @@ export const Chat: React.FC = () => {
             onChange={setInput}
             onSubmit={handleSubmit}
             isLoading={isQuerying}
-            disabled={!docId}
+            disabled={isQuerying}
           />
         </footer>
       </main>
