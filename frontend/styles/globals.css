@@ -43,8 +43,10 @@
 /* ── Reset ─────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html, body {
-  height: 100%;
+html,
+body {
+  width: 100%;
+  min-height: 100dvh;
   font-family: var(--font-sans);
   font-size: 15px;
   line-height: 1.6;
@@ -58,7 +60,8 @@ html, body {
 /* ── Layout ────────────────────────────────────────────────── */
 .chat-layout {
   display: flex;
-  height: 100vh;
+  min-height: 100dvh;
+  height: 100dvh;
   overflow: hidden;
 }
 
