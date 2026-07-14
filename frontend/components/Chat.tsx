@@ -144,16 +144,26 @@ export const Chat: React.FC = () => {
 
       {/* Main chat area */}
       <main className="chat-main">
-        <header className="chat-header">
-          <h1 className="chat-title">PDF Chat</h1>
+  <header className="chat-header">
+    <h1 className="chat-title">PDF Chat</h1>
 
-          {docId && (
-            <span className="status-pill">
-              <span className="dot dot-green" />
-              Ready
-            </span>
-          )}
-        </header>
+    {docId && (
+      <span className="status-pill">
+        <span className="dot dot-green" />
+        Ready
+      </span>
+    )}
+  </header>
+
+  <div className="mobile-upload">
+    <Upload
+      onUploadSuccess={handleUploadSuccess}
+      onUploadError={handleUploadError}
+      isUploading={isUploading}
+      setIsUploading={setIsUploading}
+      docId={docId}
+    />
+  </div>
 
         {/* Error banner */}
         {errorBanner && (
